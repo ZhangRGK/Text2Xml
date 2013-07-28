@@ -30,4 +30,8 @@ then xml will be
       </book>
     </books>
 
-is it simple?
+is it simple?  
+
+#####TODO
+- 用树的结构实现
+- 用js重写
