@@ -1,4 +1,4 @@
-Text2Xml
+﻿Text2Xml
 ========
 
 a Text2Xml tool. danm the fuxking gt and lt and close tag.
@@ -33,5 +33,5 @@ then xml will be
 is it simple?  
 
 #####TODO
-- 用树的结构实现
+- 用树的结构实现 √
 - 用js重写
