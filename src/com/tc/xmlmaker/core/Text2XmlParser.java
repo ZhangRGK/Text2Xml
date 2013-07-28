@@ -1,15 +1,9 @@
 package com.tc.xmlmaker.core;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-
+//用树的数据结构来重写
 public class Text2XmlParser {
 
-	public static int HasValue = 1;
-	public static int NoValue = 0;
 	
 	private int lineindex=0;
 	private String text;
@@ -32,7 +26,9 @@ public class Text2XmlParser {
 	
 	//核心方法，完成从文本到xml格式的转化
 	public String parse(){
-		StringBuffer result = new StringBuffer(text.length()*2); //乘以多少可以再看
+		final StringBuffer result = new StringBuffer(text.length()*2); //乘以多少可以再看
+		XmlTree xmltree = new XmlTree();
+		
 		lines = text.split("\n");
 		
 		//初始化每行的lv
@@ -43,100 +39,50 @@ public class Text2XmlParser {
 		}
 		linelvs[i] = -1;
 		
-		//逐行解析
-		while(lineindex < lines.length){
-			parseLine(result);
-			lineindex ++;
+		//1. 插出一棵树
+		XmlNode parent = null;
+		for(i=0; i<lines.length; i++){
+			String line = lines[i];
+			int curlv = linelvs[i];
+			if(parent!=null){
+				int parentlv = parent.getHeight();
+				if(curlv == parentlv){
+					parent = parent.getParent();
+				}
+				if(curlv < parentlv){
+					//上溯到正确的树高度
+					while(curlv - parentlv != 1){
+						parent = parent.getParent();
+						parentlv = parent.getHeight();
+					}
+				}
+			}
+			XmlNode newnode = XmlNode.buildXmlNode(parent, line); //只buildpro和content
+			parent = xmltree.insert(parent, newnode);
 		}
+		//2. 遍历一棵树
+		xmltree.traverse(xmltree.getRoot(), new IHandleXmlNode() {
+			@Override
+			public void handle(XmlNode node) {
+				//输出head
+				result.append(node.getIndentation()); //适当的退格
+				result.append(node.wrapTagStart());
+				//输出children
+				if(node.getContent()!=null){
+					result.append(node.getContent());
+				}else{
+					result.append("\n");
+					for(XmlNode child: node.getChildren()){
+						handle(child);
+					}
+					result.append(node.getIndentation()); //适当的退格
+				}
+				//输出tail
+				result.append(node.wrapTagEnd());
+				result.append("\n");
+			}
+		});
 		return result.toString();
-	}
-	
-	public void parseLine(StringBuffer result){
-		String line = lines[lineindex];
-		int curlv = linelvs[lineindex];
-		int nextlv = linelvs[lineindex+1];
-		//
-		String[] words = line.substring(curlv).split(" "); //避免字符串开头空格的干扰
-		//head
-		String tagname = words[0];
-		//middle
-		List<Map<String, String>> properties = getProperties(words);
-		String content = getContent(words);
-		//
-		result.append(getIndentation(curlv)); //适当的退格
-		result.append(wrapTagStart(tagname, properties));
-		//有嵌套的情况 这种情况没有content
-		if(nextlv > curlv){
-			//继续处理下一行
-			result.append("\n");
-			lineindex++;
-			parseLine(result);
-			result.append(getIndentation(curlv)); //适当的退格
-		}else{ //无递归 有内容则输出
-			if(content != null){
-				result.append(content);
-			}
-		}
-		result.append(wrapTagEnd(tagname));
-		result.append("\n");
-		//有平级的情况
-		nextlv = linelvs[lineindex+1];
-		if(nextlv == curlv){
-			lineindex++;
-			parseLine(result);
-		}
-	}
-	
-	
-	public String wrapTagStart(String tagname, List<Map<String, String>> properties){
-		StringBuffer wraped = new StringBuffer(tagname.length() + properties.size()*2);
-		wraped.append("<").append(tagname);
-		for(Map<String, String> map: properties){
-			wraped.append(" ").append(map.get("key")).append("=")
-				  .append("\"").append(map.get("value")).append("\"");
-		}
-		wraped.append(">");
-		return wraped.toString();
-	}
-	public String wrapTagEnd(String tagname){
-		return "</" + tagname + ">";
-	}
-	
-	//得到缩进
-	public String getIndentation(int lv){
-		String indent = "";
-		for(int i=0; i<lv; i++){
-			indent = indent + " ";
-		}
-		return indent;
-	}
-	
-	public String getContent(String[] words){
-		String content = null;
-		for(int i=1; i<words.length; i++){
-			String w = words[i];
-			if(w.startsWith("@@")){
-				content = w.substring(2);
-				break;  //如果出现多个 content，只管第一个
-			}
-		}
-		return content;
-	}
-	
-	public List<Map<String, String>> getProperties(String[] words){
-		List<Map<String, String>> listmap = new ArrayList<Map<String, String>>();
-		for(int i=1; i<words.length; i++){
-			String w = words[i];
-			if(w.startsWith("$$")){
-				String k = w.substring(2, w.indexOf("=")); //要求property里只有一个等号
-				String v = w.substring(w.indexOf("=")+1);
-				Map<String, String> map = new HashMap<String, String>();
-				map.put("key", k);
-				map.put("value", v);
-				listmap.add(map);
-			}
-		}
-		return listmap;
 	}
 	
 	//return 从字符串第一个字符开始 连续为空格的数量
