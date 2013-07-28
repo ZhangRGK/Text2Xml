@@ -9,15 +9,16 @@ for example:
 
 text is
 
-books $$local=china
- book
-  name @@boookkname1
-  author auttttor1
- book
-  name @@bokkkname2
-  author aaaautor2
+books $$local=china  
+&nbsp;book  
+&nbsp;&nbsp;name @@boookkname1  
+&nbsp;&nbsp;author auttttor1  
+&nbsp;book  
+&nbsp;&nbsp;name @@bokkkname2  
+&nbsp;&nbsp;author aaaautor2  
   
 then xml will be
+
 
 <books local="china">
   <book>
