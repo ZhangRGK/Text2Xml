@@ -32,6 +32,7 @@ then xml will be
 
 is it simple?  
 
-#####TODO
+####TODO
 - 用树的结构实现 √
 - 用js重写
+- 用yaml的语法来做源数据
