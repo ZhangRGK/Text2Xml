@@ -12,10 +12,10 @@ text is
     books $$local=china  
      book  
       name @@boookkname1  
-     author auttttor1  
-      book  
-     name @@bokkkname2  
-      author aaaautor2  
+      author @@auttttor1  
+     book  
+      name @@bokkkname2  
+      author @@aaaautor2  
   
 then xml will be
 
@@ -32,6 +32,7 @@ then xml will be
 
 is it simple?  
 
-#####TODO
+####TODO
 - 用树的结构实现 √
 - 用js重写
+- 用yaml的语法来做源数据
