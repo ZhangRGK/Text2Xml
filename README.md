@@ -12,10 +12,10 @@ text is
     books $$local=china  
      book  
       name @@boookkname1  
-     author auttttor1  
-      book  
-     name @@bokkkname2  
-      author aaaautor2  
+      author @@auttttor1  
+     book  
+      name @@bokkkname2  
+      author @@aaaautor2  
   
 then xml will be
 
